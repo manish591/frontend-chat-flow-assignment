@@ -10,30 +10,6 @@ import {
 } from "@xyflow/react";
 import { create } from "zustand";
 
-const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2' },
-  { id: 'e2-3', source: '2', target: '3' },
-] as Edge[];
-
-const initialNodes = [
-  {
-    id: '1',
-    type: 'message',
-    data: {
-      text: 'i love annu ji'
-    },
-    position: { x: 250, y: 25 },
-  },
-  {
-    id: '2',
-    type: 'message',
-    data: {
-      text: 'anjali ji cutie'
-    },
-    position: { x: 550, y: 50 },
-  }
-] as Node[];
-
 type ChatBotFlowBuilderActions = {
   onNodesChange: OnNodesChange<Node>;
   onEdgesChange: OnEdgesChange;
@@ -42,6 +18,7 @@ type ChatBotFlowBuilderActions = {
   setEdges: (edges: Edge[]) => void;
   updateNodeFields: (nodeId: string, fieldName: string, fieldValue: string) => void
   selectNode: (nodeId: string | null) => void
+  addNode: (node: Node) => void
 }
 
 export type ChatBotFlowBuilderState = {
@@ -52,8 +29,8 @@ export type ChatBotFlowBuilderState = {
 };
 
 const useChatBotFlowBuilderStore = create<ChatBotFlowBuilderState>((set, get) => ({
-  nodes: initialNodes,
-  edges: initialEdges,
+  nodes: [],
+  edges: [],
   selectedNode: null,
   actions: {
     onNodesChange: (changes) => {
@@ -67,9 +44,23 @@ const useChatBotFlowBuilderStore = create<ChatBotFlowBuilderState>((set, get) =>
       });
     },
     onConnect: (connection) => {
+      const sourceNodeId = connection.source;
+      const targetNodeId = connection.target;
+
+      const isEdgeExists = get().edges.find(edge => edge.source === targetNodeId && edge.target === sourceNodeId);
+
+      if (isEdgeExists) {
+        return;
+      }
+
       set({
         edges: addEdge(connection, get().edges),
       });
+    },
+    addNode: (node) => {
+      set({
+        nodes: [...get().nodes, node],
+      })
     },
     setNodes: (nodes) => {
       set({ nodes });
