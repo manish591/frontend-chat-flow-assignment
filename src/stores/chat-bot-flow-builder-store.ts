@@ -23,6 +23,14 @@ const initialNodes = [
       text: 'i love annu ji'
     },
     position: { x: 250, y: 25 },
+  },
+  {
+    id: '2',
+    type: 'message',
+    data: {
+      text: 'anjali ji cutie'
+    },
+    position: { x: 550, y: 50 },
   }
 ] as Node[];
 
@@ -33,17 +41,20 @@ type ChatBotFlowBuilderActions = {
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   updateNodeFields: (nodeId: string, fieldName: string, fieldValue: string) => void
+  selectNode: (nodeId: string | null) => void
 }
 
 export type ChatBotFlowBuilderState = {
   nodes: Node[];
   edges: Edge[];
+  selectedNode: Node | null;
   actions: ChatBotFlowBuilderActions
 };
 
 const useChatBotFlowBuilderStore = create<ChatBotFlowBuilderState>((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
+  selectedNode: null,
   actions: {
     onNodesChange: (changes) => {
       set({
@@ -79,11 +90,27 @@ const useChatBotFlowBuilderStore = create<ChatBotFlowBuilderState>((set, get) =>
         })
       })
     },
+    selectNode(nodeId) {
+      set({
+        nodes: get().nodes.map(node => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              selected: true
+            }
+          }
+          return node;
+        }),
+        selectedNode: get().nodes.find(node => node.id === nodeId)
+      })
+    },
   }
 }));
 
 export const useChatBotFlowBuilderEdges = () => useChatBotFlowBuilderStore((state) => state.edges);
 
 export const useChatBotFlowBuilderNodes = () => useChatBotFlowBuilderStore((state) => state.nodes);
+
+export const useChatBotFlowBuilderSelectedNode = () => useChatBotFlowBuilderStore((state) => state.selectedNode);
 
 export const useChatBotFlowBuilderActions = () => useChatBotFlowBuilderStore((state) => state.actions);
